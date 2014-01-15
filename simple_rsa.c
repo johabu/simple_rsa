@@ -1,14 +1,38 @@
+/*
+====================================================================================================
+simple_rsa is a very simple implementation of the basic RSA encryption algorithm
+
+===== IMPORTANT NOTE =====
+This program does NOT fulfil any safety standards! It should NOT be used for real
+encryption, because it does not provide any safety! This program is only written 
+for teaching purposes.
+
+simple_rsa is distributed without any warranty!
+
+======== LICENSE ========
+simple_rsa is free software; you can modify it or redistribute it
+under the terms of the GNU General Public License as published by
+the Free Software Foundation <http://www.fsf.org>, either version 3,
+or (at your option) any later version.
+See <http://www.gnu.org/licenses> for the license, if you
+haven't received a copy of it (GNU_GPL.txt).
+
+====================================================================================================
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
 
+//generaing a random number between RANDMIN and RANDMAX
 unsigned long get_rand(unsigned long RANDMAX, unsigned long RANDMIN) {
         unsigned long r;
         r = (rand() % (RANDMAX - RANDMIN + 1)) + RANDMIN;
         return r;
 }
 
+//get a random prime between MIN and MAX
 unsigned long get_prime(unsigned long MAX, unsigned long MIN) {
 	unsigned long rand_num;
 	unsigned int i;
@@ -16,24 +40,23 @@ unsigned long get_prime(unsigned long MAX, unsigned long MIN) {
 	while (prime != 0) {
 		prime = 0;
 		rand_num = get_rand(MAX, MIN);
-		//printf("\nRandom number between %ld and %ld:\t%ld\nTesting if prime...", MIN, MAX,rand_num);
 		for(i = 2; i < rand_num / 2 && !prime; i++) {
 			if(rand_num % i == 0)	{
-				//printf("No.\n");
 				prime = 1;
 			}
 		}
-		//if (!prime) printf("Yes.\n");
 	}
 	return rand_num;
 }
 
+//get greatest common divisor of numbers a and b using Euclidean algorithm
 unsigned long gcd(unsigned long a, unsigned long b) {
 	if (b == 0)
 		return a;
 	return gcd(b, a % b);
 }
 
+//get modular inverse of numbers a  b
 long modular_inverse(unsigned long a, unsigned long b) {
 	long b0 = b, t, q;
 	long x0 = 0, x1 = 1;
@@ -47,6 +70,7 @@ long modular_inverse(unsigned long a, unsigned long b) {
 	return x1;
 }
 
+//main function
 int main(void) {
 	printf("\nStarting RSA key generation...\n");
 	srand(time(NULL));
