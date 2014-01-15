@@ -26,6 +26,7 @@ simple\_rsa should work on most platforms, but has been tested on Linux amd64 sy
 Installing
 -----------
 To install simple\_rsa, you have to compile it, for instance with GCC:
+
 	gcc -W -Wall -o RSA simple\_rsa.c
 
 Using
@@ -33,3 +34,7 @@ Using
 simple\_rsa is able to create a RSA key pair including public and private key.
 While key generation important variables of the generation process are displayed.
 (See <http://en.wikipedia.org/wiki/RSA_(cryptosystem)> for RSA algorithm)
+
+To start simple\_rsa, just type the following command in a shell
+
+	RSA
