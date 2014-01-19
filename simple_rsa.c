@@ -24,6 +24,8 @@ haven't received a copy of it (GNU_GPL.txt).
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <stdint.h>
+#include <unistd.h>
 
 //generaing a random number between RANDMIN and RANDMAX
 unsigned long get_rand(unsigned long RANDMAX, unsigned long RANDMIN) {
@@ -49,7 +51,7 @@ unsigned long get_prime(unsigned long MAX, unsigned long MIN) {
 	return rand_num;
 }
 
-//get greatest common divisor of numbers a and b using Euclidean algorithm
+//get grearesult common divisor of numbers a and b using Euclidean algorithm
 unsigned long gcd(unsigned long a, unsigned long b) {
 	if (b == 0)
 		return a;
@@ -57,7 +59,7 @@ unsigned long gcd(unsigned long a, unsigned long b) {
 }
 
 //get modular inverse of numbers a  b
-long modular_inverse(unsigned long a, unsigned long b) {
+double modular_inverse(unsigned long a, unsigned long b) {
 	long b0 = b, t, q;
 	long x0 = 0, x1 = 1;
 	if (b == 1) return 1;
@@ -69,25 +71,70 @@ long modular_inverse(unsigned long a, unsigned long b) {
 	if (x1 < 0) x1 += b0;
 	return x1;
 }
+long n;
+unsigned long e;
+long d;
+
+//function for generating key pair
+void generate_keys(unsigned long PRIMEMIN, unsigned long PRIMEMAX, unsigned long EMIN, unsigned long EMAX) {
+	printf("\nStarting RSA key generation...\n");
+        unsigned long p, q, phi_n;
+        //generating two random prime numbers
+        p = get_prime(PRIMEMAX, PRIMEMIN);
+        q = get_prime(PRIMEMAX, PRIMEMIN);
+        n = p * q;
+        phi_n = (p - 1) * (q - 1);
+        unsigned long coprime = 0;
+        while (coprime != 1) {
+                e = get_rand(EMAX, EMIN);
+                coprime = gcd(phi_n,e);
+        }
+        d = modular_inverse(e, phi_n);
+        printf("p: %ld\nq: %ld\nn: %ld\ne: %ld\n",p,q,n,e);
+        printf("d: %ld\n====================================================\n",d);
+}
+
+unsigned long modular_power(unsigned long num, unsigned long pow, unsigned long mod)
+{
+	//using modular exponentation is faster; this algorithm can deal with much greater numbers than just using remainder()
+	unsigned long long result;
+	unsigned long long n = num;
+	for(result = 1; pow; pow >>= 1) {
+		if (pow & 1)
+			result = ((result % mod) * (n % mod)) % mod;
+		n = ((n % mod) * (n % mod)) % mod;
+	}
+	return result;
+}
 
 //main function
 int main(void) {
-	printf("\nStarting RSA key generation...\n");
+	unsigned long PRIMEMIN = 10000;
+	unsigned long PRIMEMAX = 100000;
+	unsigned long EMIN = 2000;
+	unsigned long EMAX = 5000;
+	unsigned long message = 123;
+	unsigned long long encrypted, decrypted;
+	unsigned int correct = 0;
+	system("clear");
 	srand(time(NULL));
-	unsigned long p, q, n, phi_n, e;
-	long d;
-	//generating two prime numbers
-	p = get_prime(100000, 10000);
-	q = get_prime(100000, 10000);
-	n = p * q;
-	phi_n = (p - 1) * (q - 1);
-	unsigned long coprime = 0;
-	while (coprime != 1) {
-		e = get_rand(200,100);
-		coprime = gcd(phi_n,e);
+	while (correct != 1) {
+		system("clear");
+		generate_keys(PRIMEMIN, PRIMEMAX, EMIN, EMAX);
+		encrypted = modular_power(123, e, n);
+		decrypted = modular_power(encrypted, d, n);
+		if (decrypted == 123)
+			correct = 1;
 	}
-	d = modular_inverse(e, phi_n);
-	printf("p: %ld\nq: %ld\nn: %ld\ne: %ld\n",p,q,n,e);
-	printf("d: %ld\n",d);
+	printf("=> Public key:  (%ld , %ld)\n=> Private key: (%ld , %ld)\n", n, e, n, d);
+	printf("====================================================\nClear text message: %ld\n", message);
+	printf("Encrypting...\n");
+	encrypted = modular_power(message, e, n);
+	printf("Encrypted message: %lld\nDecrypting...\n", encrypted);
+	decrypted = modular_power(encrypted, d, n);
+	printf("Decrypted message: %lld\n",decrypted);
+	if (message == decrypted)
+		printf("Decrypted message same as original message!\n");
+	printf("====================================================\n");
 	return EXIT_SUCCESS;
 }
