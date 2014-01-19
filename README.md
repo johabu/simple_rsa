@@ -27,7 +27,7 @@ Installing
 -----------
 To install simple\_rsa, you have to compile it, for instance with GCC:
 
-	gcc -W -Wall -o RSA simple\_rsa.c
+	gcc -W -Wall -o RSA simple_rsa.c -lm
 
 Using
 ------
