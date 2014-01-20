@@ -26,6 +26,7 @@ haven't received a copy of it (GNU_GPL.txt).
 #include <time.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <string.h>
 
 //generaing a random number between RANDMIN and RANDMAX
 unsigned long get_rand(unsigned long RANDMAX, unsigned long RANDMIN) {
@@ -113,9 +114,13 @@ int main(void) {
 	unsigned long PRIMEMAX = 100000;
 	unsigned long EMIN = 2000;
 	unsigned long EMAX = 5000;
-	unsigned long message = 123;
+	char message[50];
+	unsigned long char_num;
+	unsigned long long enc_text[50];
+	unsigned long long dec_text[50];
 	unsigned long long encrypted, decrypted;
 	unsigned int correct = 0;
+	unsigned int i = 0;
 	system("clear");
 	srand(time(NULL));
 	while (correct != 1) {
@@ -127,14 +132,40 @@ int main(void) {
 			correct = 1;
 	}
 	printf("=> Public key:  (%ld , %ld)\n=> Private key: (%ld , %ld)\n", n, e, n, d);
-	printf("====================================================\nClear text message: %ld\n", message);
+	printf("====================================================\nEnter text to encrypt: ");
+	fgets(message, 50, stdin);
+	printf("Clear text message: %s\n", message);
+	printf("====================================================\n");
 	printf("Encrypting...\n");
-	encrypted = modular_power(message, e, n);
-	printf("Encrypted message: %lld\nDecrypting...\n", encrypted);
-	decrypted = modular_power(encrypted, d, n);
-	printf("Decrypted message: %lld\n",decrypted);
-	if (message == decrypted)
-		printf("Decrypted message same as original message!\n");
+	for (i = 0; i < strlen(message)-1; i++) {
+		printf("%d ",message[i]);
+		char_num = message[i];
+		encrypted = modular_power(char_num, e, n);
+		enc_text[i] = encrypted;
+	}
+	printf("\nEncrypted message:\n");
+	for (i = 0; i < strlen(message)-1; i++) {
+		printf("%lld ", enc_text[i]);
+	}
+	printf("\n====================================================\n");
+	printf("Decrypting...\n");
+	for (i = 0; i < strlen(message)-1; i++) {
+		decrypted = modular_power(enc_text[i], d, n);
+		dec_text[i] = decrypted;
+	}
+	printf("\nDecrypted message:\n");
+	for (i = 0; i < strlen(message)-1; i++) {
+                printf("%lld ", dec_text[i]);
+        }
+	correct = 1;
+	for (i = 0; i < strlen(message)-1; i++) {
+		if (message[i] != dec_text[i]) {
+			correct = 0;
+		}
+	}
+	printf("\n====================================================\n");
+	if (correct == 1) printf("Decrypted message same as original message!\n");
+	if (correct == 0) printf("Decrypted message not same as original message!\n");
 	printf("====================================================\n");
 	return EXIT_SUCCESS;
 }
